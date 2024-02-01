@@ -1,39 +1,106 @@
+<!-- admin.ejs -->
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="/css/style.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
-    <title>Contato</title>
+    <!-- Adicione seus estilos e metadados aqui -->
+    <title>Admin</title>
 </head>
 <body>
     <header>
-        <div class="logo">
-            Adrielly Inocencio
-        </div>
-        <nav>
-            <ul>
-                <li><a href="/">Home</a></li>
-                <li><a href="/sobre">Sobre</a></li>
-                <li><a href="/contato">Contato</a></li>
-                <li><a href="/postagens">Postagens</a></li>
-                <li><a href="/login">Login</a></li>
-            </ul>
-        </nav>
+        <!-- Adicione seu cabeçalho aqui -->
     </header>
     <main>
         <div class="main-content">
-            <p>Bem vindo, agora você pode editar suas postagens!</p>
+            <p>Bem-vindo, agora você pode editar suas postagens!</p>
+
+            <!-- Listagem de postagens -->
+<ul>
+    <% postagens.forEach(postagem => { %>
+        <li>
+            <h3><%= postagem.titulo %></h3>
+            <p><%= postagem.conteudo %></p>
+        </li>
+    <% }); %>
+</ul>
+
+
+            <!-- Formulário para criar postagem -->
+            <form action="/criar-postagem" method="post">
+                <!-- Adicione seus campos aqui -->
+                <button type="submit">Criar Postagem</button>
+            </form>
+
+            <!-- Popup de edição -->
+            <div id="popup-edicao" style="display: none;">
+                <!-- Formulário de edição de postagem -->
+                <form id="form-edicao" method="post">
+                    <!-- Adicione seus campos aqui -->
+                    <button type="submit">Salvar Edições</button>
+                </form>
+            </div>
+
+            <!-- Popup de confirmação de exclusão -->
+            <div id="popup-exclusao" style="display: none;">
+                <p>Deseja realmente excluir esta postagem?</p>
+                <button onclick="excluirPostagem()">Sim</button>
+                <button onclick="fecharPopup()">Cancelar</button>
+            </div>
+
+            <!-- Formulário de logout -->
             <form action="/logout" class="formLogout">
                 <button type="submit" class="btn_logout">Sair</button>
             </form>
         </div>
     </main>
     <footer>
-        <p>&copy; 2024 DinoBlog</p>
+        <!-- Adicione seu rodapé aqui -->
     </footer>
+
+    <script>
+        function mostrarPopupEdicao(postId) {
+            // Obter os dados da postagem usando uma requisição AJAX
+            fetch(`/editar-postagem/${postId}`)
+                .then(response => response.json())
+                .then(data => {
+                    // Preencher o formulário de edição com os dados da postagem
+                    document.getElementById('form-edicao').elements['titulo'].value = data.titulo;
+                    document.getElementById('form-edicao').elements['conteudo'].value = data.conteudo;
+    
+                    // Exibir o popup de edição
+                    document.getElementById('popup-edicao').style.display = 'block';
+                })
+                .catch(error => console.error('Erro ao obter dados da postagem:', error));
+        }
+    
+        function confirmarExclusao(postId) {
+            // Exibir o popup de confirmação de exclusão
+            document.getElementById('popup-exclusao').style.display = 'block';
+    
+            // Definir a função de exclusão a ser chamada quando confirmado
+            document.getElementById('popup-exclusao').onclick = function () {
+                excluirPostagem(postId);
+            };
+        }
+    
+        function excluirPostagem(postId) {
+            // Enviar uma requisição AJAX para excluir a postagem
+            fetch(`/excluir-postagem/${postId}`)
+                .then(response => response.json())
+                .then(data => {
+                    console.log(data.message);
+                    // Fechar o popup de confirmação de exclusão
+                    fecharPopup();
+                    // Recarregar a página para refletir as alterações
+                    window.location.reload();
+                })
+                .catch(error => console.error('Erro ao excluir postagem:', error));
+        }
+    
+        function fecharPopup() {
+            // Ocultar todos os popups
+            document.getElementById('popup-edicao').style.display = 'none';
+            document.getElementById('popup-exclusao').style.display = 'none';
+        }
+    </script>
 </body>
 </html>
